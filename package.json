@@ -1,0 +1,24 @@
+{
+  "name": "@winpath-tools/pathfix-cli",
+  "version": "1.0.0",
+  "description": "Windows PATH diagnostic, backup, restore, and audit CLI tools",
+  "bin": {
+    "pathfix": "./bin/pathfix.js"
+  },
+  "files": [
+    "bin/",
+    "scripts/"
+  ],
+  "keywords": ["windows", "path", "environment", "diagnostic", "backup", "restore"],
+  "author": "winpath-tools",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/winpath-tools/pathfix-cli.git"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "os": ["win32"]
+}
