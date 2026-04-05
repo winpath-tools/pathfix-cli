@@ -4,38 +4,48 @@
 const { execFileSync } = require("child_process");
 const path = require("path");
 
+if (process.platform !== "win32") {
+  console.error("pathfix only runs on Windows.");
+  process.exit(1);
+}
+
 const SCRIPTS_DIR = path.join(__dirname, "..", "scripts");
 
+// Each flag maps to { ps: "<PowerShell param>", isSwitch: <bool> }.
+// isSwitch: true  → passed as a bare switch (-FlagName)
+// isSwitch: false → expects a following value (-Param Value)
 const COMMANDS = {
   diagnose: {
     script: "Diagnose-Path.ps1",
     desc: "Check PATH for duplicates, missing dirs, stale entries, and tool reachability",
-    flags: { "--auto-restore": "-AutoRestore" },
+    flags: {
+      "--auto-restore": { ps: "-AutoRestore", isSwitch: true },
+    },
   },
   backup: {
     script: "Backup-Path.ps1",
     desc: "Backup System and User PATH to OneDrive (timestamped)",
     flags: {
-      "--skip-audit": "-SkipAudit",
-      "--dir": "-BackupDir",
-      "--max": "-MaxBackups",
+      "--skip-audit": { ps: "-SkipAudit", isSwitch: true },
+      "--dir":        { ps: "-BackupDir",  isSwitch: false },
+      "--max":        { ps: "-MaxBackups", isSwitch: false },
     },
   },
   restore: {
     script: "Restore-Path.ps1",
     desc: "Restore PATH from a backup file",
     flags: {
-      "--scope": "-Scope",
-      "--dir": "-BackupDir",
+      "--scope": { ps: "-Scope",     isSwitch: false },
+      "--dir":   { ps: "-BackupDir", isSwitch: false },
     },
   },
   audit: {
     script: "Audit-PathApps.ps1",
     desc: "Scan registry installs and npm globals for CLI tools missing from PATH",
     flags: {
-      "--skip-registry": "-SkipRegistry",
-      "--skip-npm": "-SkipNpm",
-      "--quiet": "-Quiet",
+      "--skip-registry": { ps: "-SkipRegistry", isSwitch: true },
+      "--skip-npm":      { ps: "-SkipNpm",      isSwitch: true },
+      "--quiet":         { ps: "-Quiet",         isSwitch: true },
     },
   },
 };
@@ -75,26 +85,22 @@ function buildPwshArgs(command, argv) {
 
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
-    const psFlag = command.flags[arg];
+    const flagDef = command.flags[arg];
 
-    if (!psFlag) {
+    if (!flagDef) {
       console.error(`Unknown flag: ${arg}`);
       process.exit(1);
     }
 
-    // Check if this flag takes a value (doesn't start with "-" as a switch)
-    // Switch params in PS are just -FlagName; value params need -Param Value
-    const isSwitch = ["-AutoRestore", "-SkipAudit", "-SkipRegistry", "-SkipNpm", "-Quiet"].includes(psFlag);
-
-    if (isSwitch) {
-      psArgs.push(psFlag);
+    if (flagDef.isSwitch) {
+      psArgs.push(flagDef.ps);
     } else {
       const value = argv[++i];
-      if (!value) {
+      if (!value || value.startsWith("--")) {
         console.error(`Flag ${arg} requires a value`);
         process.exit(1);
       }
-      psArgs.push(psFlag, value);
+      psArgs.push(flagDef.ps, value);
     }
   }
 

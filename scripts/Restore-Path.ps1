@@ -12,6 +12,7 @@
     .\Restore-Path.ps1
     .\Restore-Path.ps1 -BackupDir "D:\Backups\PATH" -Scope User
 #>
+[CmdletBinding()]
 param(
     [string]$BackupDir = (Join-Path ($env:OneDrive ?? $env:USERPROFILE) "PATH_Backups"),
     [ValidateSet("System", "User", "Both", "")]
@@ -64,7 +65,7 @@ function Restore-PathFromBackup {
 
     if ($Backups.Count -eq 0) {
         Write-Warning "No $PathScope PATH backups found."
-        return
+        return $false
     }
 
     Write-Host ""
@@ -78,13 +79,18 @@ function Restore-PathFromBackup {
     $pick = Read-Host "Select backup to restore for $PathScope PATH"
     if ($pick -eq 'Q' -or $pick -eq 'q') {
         Write-Host "Skipped $PathScope PATH restore."
-        return
+        return $false
     }
 
-    $index = [int]$pick - 1
+    $index = 0
+    if ([int]::TryParse($pick, [ref]$index)) {
+        $index = $index - 1
+    } else {
+        $index = -1
+    }
     if ($index -lt 0 -or $index -ge $Backups.Count) {
         Write-Warning "Invalid selection."
-        return
+        return $false
     }
 
     $selectedFile = $Backups[$index]
@@ -92,7 +98,7 @@ function Restore-PathFromBackup {
 
     if ([string]::IsNullOrWhiteSpace($newPath)) {
         Write-Error "Backup file is empty: $($selectedFile.FullName)"
-        return
+        return $false
     }
 
     $entryCount = ($newPath -split ';' | Where-Object { $_ -ne '' }).Count
@@ -106,7 +112,7 @@ function Restore-PathFromBackup {
     $confirm = Read-Host "Apply this $PathScope PATH? (y/n)"
     if ($confirm -ne 'y') {
         Write-Host "Skipped."
-        return
+        return $false
     }
 
     # Check admin for System scope
@@ -115,7 +121,7 @@ function Restore-PathFromBackup {
         $isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
         if (-not $isAdmin) {
             Write-Error "Restoring System PATH requires running as Administrator."
-            return
+            return $false
         }
     }
 
@@ -128,21 +134,28 @@ function Restore-PathFromBackup {
 
     [Environment]::SetEnvironmentVariable("Path", $newPath, $target)
     Write-Host "  $PathScope PATH restored successfully." -ForegroundColor Green
+    return $true
 }
 
 # ── Execute restores ───────────────────────────────────────────────────────
+$anyRestored = $false
 if ($Scope -eq "System" -or $Scope -eq "Both") {
-    Restore-PathFromBackup -PathScope "System" -Backups $systemBackups
+    if (Restore-PathFromBackup -PathScope "System" -Backups $systemBackups) { $anyRestored = $true }
 }
 
 if ($Scope -eq "User" -or $Scope -eq "Both") {
-    Restore-PathFromBackup -PathScope "User" -Backups $userBackups
+    if (Restore-PathFromBackup -PathScope "User" -Backups $userBackups) { $anyRestored = $true }
 }
 
 # ── Refresh current session PATH from registry ─────────────────────────────
-$env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+if ($anyRestored) {
+    $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
 
-Write-Host ""
-Write-Host "Restore complete. This session's PATH has been refreshed." -ForegroundColor Cyan
-Write-Host "Other open terminals still need to be restarted or run:" -ForegroundColor DarkGray
-Write-Host '  $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")' -ForegroundColor DarkGray
+    Write-Host ""
+    Write-Host "Restore complete. This session's PATH has been refreshed." -ForegroundColor Cyan
+    Write-Host "Other open terminals still need to be restarted or run:" -ForegroundColor DarkGray
+    Write-Host '  $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")' -ForegroundColor DarkGray
+} else {
+    Write-Host ""
+    Write-Host "No changes were applied." -ForegroundColor DarkGray
+}

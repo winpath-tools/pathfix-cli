@@ -16,6 +16,7 @@
     .\Audit-PathApps.ps1 -SkipRegistry
     $missing = .\Audit-PathApps.ps1 -Quiet
 #>
+[CmdletBinding()]
 param(
     [switch]$SkipRegistry,
     [switch]$SkipNpm,
@@ -137,7 +138,7 @@ if (-not $SkipNpm) {
             $npmList = npm list -g --depth=0 --parseable 2>$null
             $globalPkgs = @()
             if ($npmList) {
-                $globalPkgs = $npmList -split "`n" | Where-Object { $_ -and $_ -ne $npmPrefix }
+                $globalPkgs = $npmList -split "`r?`n" | Where-Object { $_ -and $_.Trim() -ne $npmPrefix }
             }
 
             # Find .cmd shims in the prefix directory
