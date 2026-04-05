@@ -16,6 +16,7 @@
     .\Backup-Path.ps1 -BackupDir "D:\Backups\PATH" -MaxBackups 10
     .\Backup-Path.ps1 -SkipAudit
 #>
+[CmdletBinding()]
 param(
     [string]$BackupDir = (Join-Path ($env:OneDrive ?? $env:USERPROFILE) "PATH_Backups"),
     [int]$MaxBackups = 20,
@@ -33,7 +34,7 @@ if (-not (Test-Path $BackupDir)) {
 $timestamp = Get-Date -Format "yyyyMMdd_HHmmss"
 
 # ── Backup System PATH ─────────────────────────────────────────────────────
-$systemPath = [Environment]::GetEnvironmentVariable("Path", "Machine")
+$systemPath = [Environment]::GetEnvironmentVariable("Path", "Machine") ?? ''
 $systemFile = Join-Path $BackupDir "SystemPath_$timestamp.txt"
 $systemPath | Out-File $systemFile -Encoding UTF8
 
@@ -41,7 +42,7 @@ $systemEntries = ($systemPath -split ';' | Where-Object { $_ -ne '' }).Count
 Write-Host "System PATH backed up: $systemFile ($systemEntries entries)" -ForegroundColor Green
 
 # ── Backup User PATH ───────────────────────────────────────────────────────
-$userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+$userPath = [Environment]::GetEnvironmentVariable("Path", "User") ?? ''
 $userFile = Join-Path $BackupDir "UserPath_$timestamp.txt"
 $userPath | Out-File $userFile -Encoding UTF8
 
