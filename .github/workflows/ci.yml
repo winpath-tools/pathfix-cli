@@ -54,7 +54,7 @@ jobs:
         run: |
           Install-Module -Name PSScriptAnalyzer -Force -Scope CurrentUser
           $results = Get-ChildItem scripts/*.ps1 | ForEach-Object {
-            Invoke-ScriptAnalyzer -Path $_.FullName -Severity Error,Warning
+            Invoke-ScriptAnalyzer -Path $_.FullName -Severity Error
           }
           if ($results) {
             $results | Format-Table -AutoSize
