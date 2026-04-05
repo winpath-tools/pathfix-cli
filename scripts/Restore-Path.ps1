@@ -82,12 +82,8 @@ function Restore-PathFromBackup {
         return $false
     }
 
-    $index = 0
-    if ([int]::TryParse($pick, [ref]$index)) {
-        $index = $index - 1
-    } else {
-        $index = -1
-    }
+    $parsedIndex = 0
+    $index = if ([int]::TryParse($pick, [ref]$parsedIndex)) { $parsedIndex - 1 } else { -1 }
     if ($index -lt 0 -or $index -ge $Backups.Count) {
         Write-Warning "Invalid selection."
         return $false
@@ -149,7 +145,7 @@ if ($Scope -eq "User" -or $Scope -eq "Both") {
 
 # ── Refresh current session PATH from registry ─────────────────────────────
 if ($anyRestored) {
-    $env:Path = [Environment]::GetEnvironmentVariable("Path", "Machine") + ";" + [Environment]::GetEnvironmentVariable("Path", "User")
+    $env:Path = ([Environment]::GetEnvironmentVariable("Path", "Machine") ?? '') + ";" + ([Environment]::GetEnvironmentVariable("Path", "User") ?? '')
 
     Write-Host ""
     Write-Host "Restore complete. This session's PATH has been refreshed." -ForegroundColor Cyan

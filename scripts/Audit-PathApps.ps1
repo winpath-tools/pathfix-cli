@@ -138,7 +138,7 @@ if (-not $SkipNpm) {
             $npmList = npm list -g --depth=0 --parseable 2>$null
             $globalPkgs = @()
             if ($npmList) {
-                $globalPkgs = $npmList -split "`r?`n" | Where-Object { $_ -and $_.Trim() -ne $npmPrefix }
+                $globalPkgs = $npmList -split "`r?`n" | Where-Object { $_ -and $_ -ne $npmPrefix }
             }
 
             # Find .cmd shims in the prefix directory
