@@ -11,6 +11,7 @@
     .\Diagnose-Path.ps1
     .\Diagnose-Path.ps1 -AutoRestore
 #>
+[CmdletBinding()]
 param(
     [switch]$AutoRestore
 )
@@ -202,7 +203,6 @@ if ($issueCount -gt 0) {
         Write-Warning "Restore-Path.ps1 not found at: $restoreScript"
         return
     }
-
 
     if ($AutoRestore) {
         Write-Host "AutoRestore enabled — launching Restore-Path.ps1..." -ForegroundColor Yellow
