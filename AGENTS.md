@@ -15,7 +15,7 @@ Branches: `lundgren-greg/<name>` in `C:\Users\lundg\orca\workspaces\pathfix-cli\
 - Help smoke test: `node bin/pathfix.js --help`
 - PowerShell syntax: parse `scripts/*.ps1` with `[System.Management.Automation.Language.Parser]::ParseFile`
 - Lint: `Invoke-ScriptAnalyzer -Path scripts -Severity Error`
-- Smoke: `pwsh -NoProfile -File scripts/Diagnose-Path.ps1` (read-only)
+- Smoke: `pwsh -NoProfile -File scripts/Diagnose-Path.ps1` (read-only only without `-AutoRestore`; if issues are found it prompts to run Restore-Path.ps1, so never answer `y`)
 
 ## Layout
 - `bin/pathfix.js` — sole entry point; flag mapping in `COMMANDS`, switch vs value params in `buildPwshArgs()`
@@ -24,7 +24,7 @@ Branches: `lundgren-greg/<name>` in `C:\Users\lundg\orca\workspaces\pathfix-cli\
 
 ## Conventions
 - JS: CommonJS, `"use strict"`, 2-space, LF. PowerShell: 4-space, approved verbs. No npm dependencies.
-- `restore` overwrites the real machine/user PATH: never run `Restore-Path.ps1` in tests or CI (a test backup does not make it safe).
-- `backup` writes and prunes files in `$env:OneDrive\PATH_Backups` by default: in tests always pass `-BackupDir` pointing at a temp dir.
+- `restore` overwrites the real machine/user PATH: never run `Restore-Path.ps1` in tests or CI (a test backup does not make it safe). This includes `diagnose --auto-restore` / `-AutoRestore`, which launches it.
+- `backup` writes (System/User PATH plus `Audit_*.txt`) and prunes files in `$env:OneDrive\PATH_Backups` (or `$env:USERPROFILE\PATH_Backups`) by default: in tests always pass `-BackupDir` pointing at a temp dir.
 - Never commit secrets or real PATH backups; quarantine anything sensitive and report it.
 - Record lasting changes in README.md or the wiki.

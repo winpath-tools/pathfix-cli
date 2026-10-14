@@ -4,4 +4,5 @@ node_modules/
 # Real PATH backups (Backup-Path.ps1 output) must never be committed
 SystemPath_*.txt
 UserPath_*.txt
+Audit_*.txt
 PATH_Backups/
