@@ -13,11 +13,11 @@
 | `pathfix restore`  | `Restore-Path.ps1`    | Restore PATH from a backup file                      |
 | `pathfix audit`    | `Audit-PathApps.ps1`  | Scan for CLI tools missing from PATH                 |
 
-Entry point: `bin/pathfix.js` â€” uses `child_process.execFileSync` to invoke `pwsh`.
+Entry point: `bin/pathfix.js` — uses `child_process.execFileSync` to invoke `pwsh`.
 
 ## Tech stack
 
-- **Runtime**: Node.js >= 18 (no dependencies â€” stdlib only)
+- **Runtime**: Node.js >= 18 (no dependencies — stdlib only)
 - **Scripts**: PowerShell 7+ (`pwsh`), Windows-only
 - **CI**: GitHub Actions on `windows-latest` (PSScriptAnalyzer, node syntax, smoke test)
 - **OS**: Windows only (`"os": ["win32"]` in package.json)
@@ -27,13 +27,13 @@ Entry point: `bin/pathfix.js` â€” uses `child_process.execFileSync` to invo
 - JavaScript: CommonJS (`require`), `"use strict"`, 2-space indent, LF line endings
 - PowerShell: 4-space indent, approved verbs (`Verb-Noun`), `[CmdletBinding()]` on all scripts
 - EditorConfig enforced (see `.editorconfig`)
-- No external npm dependencies â€” keep it zero-dep
+- No external npm dependencies — keep it zero-dep
 
 ## Architecture rules
 
 - `bin/pathfix.js` is the sole entry point; it maps CLI flags to PowerShell parameters
 - Each command maps to exactly one `.ps1` script in `scripts/`
-- Flag mapping is defined in the `COMMANDS` object â€” add new flags there
+- Flag mapping is defined in the `COMMANDS` object — add new flags there
 - Switch parameters (boolean) vs value parameters are distinguished in `buildPwshArgs()`
 
 ## Branch protection
