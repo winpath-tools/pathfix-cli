@@ -1,4 +1,4 @@
-﻿> All agents: the workflow, commands, and layout live in [AGENTS.md](../AGENTS.md). Follow it together with the details below.
+> All agents: the workflow, commands, and layout live in [AGENTS.md](../AGENTS.md). Follow it together with the details below.
 
 # Copilot Instructions for pathfix-cli
 
