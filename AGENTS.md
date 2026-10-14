@@ -24,6 +24,7 @@ Branches: `lundgren-greg/<name>` in `C:\Users\lundg\orca\workspaces\pathfix-cli\
 
 ## Conventions
 - JS: CommonJS, `"use strict"`, 2-space, LF. PowerShell: 4-space, approved verbs. No npm dependencies.
-- `restore` and `backup` touch the real machine PATH: never run `Restore-Path.ps1` in tests or CI without an explicit test backup.
+- `restore` overwrites the real machine/user PATH: never run `Restore-Path.ps1` in tests or CI (a test backup does not make it safe).
+- `backup` writes and prunes files in `$env:OneDrive\PATH_Backups` by default: in tests always pass `-BackupDir` pointing at a temp dir.
 - Never commit secrets or real PATH backups; quarantine anything sensitive and report it.
 - Record lasting changes in README.md or the wiki.

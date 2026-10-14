@@ -1,2 +1,7 @@
 node_modules/
 *.log
+
+# Real PATH backups (Backup-Path.ps1 output) must never be committed
+SystemPath_*.txt
+UserPath_*.txt
+PATH_Backups/
